@@ -1,4 +1,4 @@
-package com.ahrokholska.gifs.ui.theme
+package com.ahrokholska.gifs.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

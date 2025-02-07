@@ -1,4 +1,4 @@
-package com.ahrokholska.gifs.ui.theme
+package com.ahrokholska.gifs.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
