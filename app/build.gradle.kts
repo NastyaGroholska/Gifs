@@ -66,8 +66,10 @@ dependencies {
 
     //Hilt
     ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
 
     //Navigation
     implementation(libs.androidx.navigation.compose)
@@ -92,4 +94,10 @@ dependencies {
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.room.paging)
+
+    //WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+
+    //Glide
+    implementation(libs.glide)
 }

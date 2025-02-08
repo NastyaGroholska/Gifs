@@ -18,4 +18,10 @@ interface GifDao {
 
     @Query("SELECT * FROM gifs LEFT  JOIN gif_tags ON gifs.id = gif_tags.id  WHERE label=:query")
     fun pagingSource(query: String): PagingSource<Int, Gif>
+
+    @Query("SELECT * FROM gifs WHERE id=:id")
+    suspend fun getGifById(id: String): Gif?
+
+    @Query("UPDATE gifs SET localUrl=:localUrl WHERE id=:id")
+    suspend fun updateGifLocal(id: String, localUrl: String)
 }

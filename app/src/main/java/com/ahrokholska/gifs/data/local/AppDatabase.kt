@@ -1,7 +1,10 @@
 package com.ahrokholska.gifs.data.local
 
+import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.RenameColumn
 import androidx.room.RoomDatabase
+import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.ahrokholska.gifs.data.local.dao.GifDao
@@ -12,12 +15,22 @@ import com.ahrokholska.gifs.data.local.entities.RemoteKey
 
 @Database(
     entities = [Gif::class, RemoteKey::class, GifTag::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(
+            from = 3,
+            to = 4,
+            spec = AppDatabase.AutoMigration_3_4::class
+        )
+    ]
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun gifDao(): GifDao
     abstract fun remoteKeyDao(): RemoteKeyDao
+
+    @RenameColumn(tableName = "gifs", "url", "networkUrl")
+    class AutoMigration_3_4 : AutoMigrationSpec
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {

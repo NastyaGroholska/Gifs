@@ -2,6 +2,7 @@ package com.ahrokholska.gifs.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.work.WorkManager
 import com.ahrokholska.gifs.data.Constants
 import com.ahrokholska.gifs.data.local.AppDatabase
 import com.ahrokholska.gifs.data.local.AppDatabase.Companion.MIGRATION_1_2
@@ -61,4 +62,8 @@ object AppModule {
     @Provides
     @Singleton
     fun provideGifService(retrofit: Retrofit): GifService = retrofit.create(GifService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideWorkManager(@ApplicationContext context: Context) = WorkManager.getInstance(context)
 }

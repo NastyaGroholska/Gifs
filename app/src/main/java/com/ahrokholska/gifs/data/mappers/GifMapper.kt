@@ -7,7 +7,7 @@ import com.ahrokholska.gifs.domain.model.Gif as GifDomain
 
 fun Gif.toEntity() = GifEntity(
     id = id,
-    url = images.original.url,
+    networkUrl = images.original.url
 )
 
 fun Gif.toGifTag(label: String) = GifTag(
@@ -17,5 +17,5 @@ fun Gif.toGifTag(label: String) = GifTag(
 
 fun GifEntity.toDomain() = GifDomain(
     id = id,
-    url = url
+    url = localUrl.ifEmpty { networkUrl }
 )

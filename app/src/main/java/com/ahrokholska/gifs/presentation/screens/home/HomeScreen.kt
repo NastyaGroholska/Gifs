@@ -43,6 +43,7 @@ import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import coil3.compose.SubcomposeAsyncImage
 import com.ahrokholska.gifs.R
 import com.ahrokholska.gifs.domain.model.Gif
@@ -101,7 +102,7 @@ fun HomeScreenContent(gifs: LazyPagingItems<Gif>, onSearchClick: (String) -> Uni
                 ) {
                     items(
                         count = gifs.itemCount,
-                        key = { ind -> gifs[ind]?.id.toString() }
+                        key = gifs.itemKey { it.id }
                     ) { index ->
                         SubcomposeAsyncImage(
                             modifier = Modifier.clip(RoundedCornerShape(5.dp)),
