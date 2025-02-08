@@ -48,11 +48,20 @@ class GifRemoteMediator(
 
             val limit = state.config.pageSize
             Log.d("WWW", "network limit=$limit offset=$loadKey")
-            val response = gifService.getGifs(
-                limit = limit,
-                offset = loadKey,
-                query = query
-            )
+
+            val response = if (query.isEmpty()) {
+                gifService.getTrendingGifs(
+                    limit = limit,
+                    offset = loadKey,
+                )
+            } else {
+                gifService.getGifs(
+                    limit = limit,
+                    offset = loadKey,
+                    query = query
+                )
+            }
+
             Log.d("WWW", "result $response")
 
             val totalCount = response.pagination.totalCount
