@@ -5,5 +5,5 @@ data class Image(
 )
 
 data class OriginalImage(
-    val mp4: String
+    val url: String
 )

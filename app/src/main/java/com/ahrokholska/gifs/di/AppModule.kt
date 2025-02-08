@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.ahrokholska.gifs.data.Constants
 import com.ahrokholska.gifs.data.local.AppDatabase
+import com.ahrokholska.gifs.data.local.AppDatabase.Companion.MIGRATION_1_2
 import com.ahrokholska.gifs.data.network.GifService
 import dagger.Module
 import dagger.Provides
@@ -23,7 +24,17 @@ object AppModule {
     @Singleton
     fun provideRoomDb(@ApplicationContext context: Context) = Room.databaseBuilder(
         context, AppDatabase::class.java, "app_database"
-    ).build()
+    )
+        .addMigrations(MIGRATION_1_2)
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideGifDao(database: AppDatabase) = database.gifDao()
+
+    @Provides
+    @Singleton
+    fun provideRemoteKeyDao(database: AppDatabase) = database.remoteKeyDao()
 
     @Provides
     @Singleton
