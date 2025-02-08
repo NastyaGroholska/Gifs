@@ -8,6 +8,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,8 +19,14 @@ class HomeScreenViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val gifs = _searchQuery.flatMapLatest {
-        getPaginatedDataUseCase("burger")
+    val gifs = _searchQuery.flatMapLatest { query ->
+        getPaginatedDataUseCase(query)
     }.cachedIn(viewModelScope)
+
+    fun searchChanged(query: String) {
+        viewModelScope.launch {
+            _searchQuery.update { query }
+        }
+    }
 }
 

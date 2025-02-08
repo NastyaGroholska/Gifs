@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,6 +44,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil3.compose.SubcomposeAsyncImage
+import com.ahrokholska.gifs.R
 import com.ahrokholska.gifs.domain.model.Gif
 import kotlinx.coroutines.flow.flowOf
 
@@ -50,11 +52,12 @@ import kotlinx.coroutines.flow.flowOf
 fun HomeScreen(viewModel: HomeScreenViewModel = hiltViewModel()) {
     HomeScreenContent(
         gifs = viewModel.gifs.collectAsLazyPagingItems(),
+        onSearchClick = viewModel::searchChanged,
     )
 }
 
 @Composable
-fun HomeScreenContent(gifs: LazyPagingItems<Gif>) {
+fun HomeScreenContent(gifs: LazyPagingItems<Gif>, onSearchClick: (String) -> Unit = {}) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
             modifier = Modifier
@@ -66,11 +69,11 @@ fun HomeScreenContent(gifs: LazyPagingItems<Gif>) {
                 modifier = Modifier.padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                var value by rememberSaveable { mutableStateOf("") }
                 SearchField(
                     modifier = Modifier.weight(1f),
-                    onSearchChanged = {
-                        //TODO
-                    }
+                    value = value,
+                    onSearchChanged = { value = it }
                 )
                 Icon(
                     modifier = Modifier
@@ -78,7 +81,7 @@ fun HomeScreenContent(gifs: LazyPagingItems<Gif>) {
                         .clip(CircleShape)
                         .background(color = MaterialTheme.colorScheme.primary)
                         .clickable {
-                            //TODO
+                            onSearchClick(value)
                         }
                         .padding(5.dp),
                     imageVector = Icons.Outlined.Search,
@@ -143,8 +146,11 @@ fun HomeScreenContent(gifs: LazyPagingItems<Gif>) {
 }
 
 @Composable
-private fun SearchField(modifier: Modifier = Modifier, onSearchChanged: (String) -> Unit) {
-    var value by rememberSaveable { mutableStateOf("") }
+private fun SearchField(
+    modifier: Modifier = Modifier,
+    value: String,
+    onSearchChanged: (String) -> Unit
+) {
     BasicTextField(
         modifier = modifier
             .background(
@@ -153,14 +159,11 @@ private fun SearchField(modifier: Modifier = Modifier, onSearchChanged: (String)
             )
             .padding(8.dp),
         value = value,
-        onValueChange = {
-            value = it
-            onSearchChanged(it)
-        },
+        onValueChange = { onSearchChanged(it) },
         decorationBox = { innerTextField ->
             Box(contentAlignment = Alignment.CenterStart) {
                 Text(
-                    text = if (value.isEmpty()) "Search" else "",
+                    text = if (value.isEmpty()) stringResource(R.string.search) else "",
                     color = MaterialTheme.colorScheme.secondary
                 )
                 innerTextField()
