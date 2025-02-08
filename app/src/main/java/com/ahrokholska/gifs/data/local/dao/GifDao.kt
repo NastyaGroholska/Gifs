@@ -6,12 +6,16 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ahrokholska.gifs.data.local.entities.Gif
+import com.ahrokholska.gifs.data.local.entities.GifTag
 
 @Dao
 interface GifDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(gifs: List<Gif>)
 
-    @Query("SELECT * FROM gifs")
-    fun pagingSource(): PagingSource<Int, Gif>
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAllTags(gifTags: List<GifTag>)
+
+    @Query("SELECT * FROM gifs LEFT  JOIN gif_tags ON gifs.id = gif_tags.id  WHERE label=:query")
+    fun pagingSource(query: String): PagingSource<Int, Gif>
 }

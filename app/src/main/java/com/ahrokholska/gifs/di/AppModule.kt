@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.ahrokholska.gifs.data.Constants
 import com.ahrokholska.gifs.data.local.AppDatabase
 import com.ahrokholska.gifs.data.local.AppDatabase.Companion.MIGRATION_1_2
+import com.ahrokholska.gifs.data.local.AppDatabase.Companion.MIGRATION_2_3
 import com.ahrokholska.gifs.data.network.GifService
 import dagger.Module
 import dagger.Provides
@@ -26,6 +27,7 @@ object AppModule {
         context, AppDatabase::class.java, "app_database"
     )
         .addMigrations(MIGRATION_1_2)
+        .addMigrations(MIGRATION_2_3)
         .build()
 
     @Provides

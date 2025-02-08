@@ -10,12 +10,14 @@ import com.ahrokholska.gifs.data.local.AppDatabase
 import com.ahrokholska.gifs.data.local.entities.Gif
 import com.ahrokholska.gifs.data.local.entities.RemoteKey
 import com.ahrokholska.gifs.data.mappers.toEntity
+import com.ahrokholska.gifs.data.mappers.toGifTag
 import com.ahrokholska.gifs.data.network.GifService
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
 @OptIn(ExperimentalPagingApi::class)
 class GifRemoteMediator(
+    private val query: String,
     private val database: AppDatabase,
     private val gifService: GifService,
 ) : RemoteMediator<Int, Gif>() {
@@ -32,7 +34,7 @@ class GifRemoteMediator(
                 LoadType.APPEND -> {
                     Log.d("WWW", "APPEND")
                     val remoteKey = database.withTransaction {
-                        remoteKeyDao.remoteKeyByQuery("burger")
+                        remoteKeyDao.remoteKeyByQuery(query)
                     }
                     Log.d("WWW", "remoteKey $remoteKey")
 
@@ -44,7 +46,6 @@ class GifRemoteMediator(
                 }
             }
 
-            val query = "burger"
             val limit = state.config.pageSize
             Log.d("WWW", "network limit=$limit offset=$loadKey")
             val response = gifService.getGifs(
@@ -72,6 +73,7 @@ class GifRemoteMediator(
                 )
 
                 gifsDao.insertAll(response.data.map { it.toEntity() })
+                gifsDao.insertAllTags(response.data.map { it.toGifTag(query) })
             }
 
             MediatorResult.Success(isEndOfPaginationReached)
