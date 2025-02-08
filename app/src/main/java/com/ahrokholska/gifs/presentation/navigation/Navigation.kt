@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ahrokholska.gifs.presentation.screens.HomeScreen
+import com.ahrokholska.gifs.presentation.screens.home.HomeScreen
 
 @Composable
 fun Navigation() {
