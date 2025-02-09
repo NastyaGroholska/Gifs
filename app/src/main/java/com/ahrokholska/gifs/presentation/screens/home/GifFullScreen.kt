@@ -23,11 +23,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,7 +39,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import coil3.compose.SubcomposeAsyncImage
+import com.ahrokholska.gifs.R
 import com.ahrokholska.gifs.domain.model.Gif
+import com.ahrokholska.gifs.presentation.common.AlertDialog
 import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -47,10 +52,25 @@ fun GifFullScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
+    var openAlertDialog by remember { mutableStateOf(false) }
+    var gifId by remember { mutableStateOf("") }
+    if (openAlertDialog) {
+        AlertDialog(
+            onDismissRequest = { openAlertDialog = false },
+            title = stringResource(R.string.are_you_sure_you_want_to_delete_this_gif_this_action_is_irreversible),
+            onConfirmation = {
+                openAlertDialog = false
+                viewModel.deleteGif(gifId)
+            }
+        )
+    }
     GifFullScreenContent(
         initialPosition = initialPosition,
         gifs = viewModel.gifs.collectAsLazyPagingItems(),
-        onDeleteImageClick = viewModel::deleteGif,
+        onDeleteImageClick = {
+            gifId = it
+            openAlertDialog = true
+        },
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
     )
