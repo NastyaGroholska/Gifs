@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -104,25 +105,41 @@ fun HomeScreenContent(gifs: LazyPagingItems<Gif>, onSearchClick: (String) -> Uni
                         count = gifs.itemCount,
                         key = gifs.itemKey { it.id }
                     ) { index ->
-                        SubcomposeAsyncImage(
-                            modifier = Modifier.clip(RoundedCornerShape(5.dp)),
-                            contentScale = ContentScale.FillWidth,
-                            model = gifs[index]?.url,
-                            loading = {
-                                CircularProgressIndicator(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .wrapContentWidth(Alignment.CenterHorizontally)
-                                )
-                            },
-                            error = {
-                                Icon(
-                                    painter = rememberVectorPainter(image = Icons.Filled.Clear),
-                                    contentDescription = null
-                                )
-                            },
-                            contentDescription = null,
-                        )
+                        gifs[index]?.let { gif ->
+                            val model by rememberSaveable(key = gif.id) { mutableStateOf(gif.url) }
+
+                            SubcomposeAsyncImage(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(5.dp))
+                                    .clickable {
+                                        onIm(gif.id)
+                                    },
+                                contentScale = ContentScale.FillWidth,
+                                model = model,
+                                loading = {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .aspectRatio(1f),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                },
+                                error = {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Icons.Filled.Clear),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .aspectRatio(1f)
+                                            .wrapContentWidth(Alignment.CenterHorizontally),
+                                        contentDescription = null
+                                    )
+                                },
+                                contentDescription = null,
+                            )
+
+                        }
                     }
                     if (gifs.loadState.append == LoadState.Loading) {
                         item(span = StaggeredGridItemSpan.FullLine) {
@@ -140,6 +157,9 @@ fun HomeScreenContent(gifs: LazyPagingItems<Gif>, onSearchClick: (String) -> Uni
                             .fillMaxWidth()
                             .wrapContentWidth(Alignment.CenterHorizontally)
                     )
+                }
+                if (gifs.loadState.isIdle && gifs.itemCount == 0) {
+                    Text(text = stringResource(R.string.there_are_no_gifs_matching_your_request))
                 }
             }
         }
@@ -182,7 +202,7 @@ private fun HomeScreenPreview() {
             PagingData.from(
                 List(15) {
                     Gif(
-                        id = "",
+                        id = "$it",
                         url = "https://media3.giphy.com/media/v1.Y2lkPWEwMDMxZWRkNXI1MXgzZ3g1dXZvZnplOXA1bHpza2Y1NG1yeGtnMHllZzBjNnFoZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/IgOEWPOgK6uVa/200w.gif"
                     )
                 }

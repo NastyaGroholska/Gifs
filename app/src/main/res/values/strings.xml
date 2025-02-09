@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Gifs</string>
     <string name="search">Search</string>
+    <string name="there_are_no_gifs_matching_your_request">There are no gifs matching your request</string>
 </resources>
