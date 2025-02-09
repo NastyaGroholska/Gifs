@@ -97,7 +97,4 @@ dependencies {
 
     //WorkManager
     implementation(libs.androidx.work.runtime.ktx)
-
-    //Glide
-    implementation(libs.glide)
 }
