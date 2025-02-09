@@ -10,4 +10,6 @@ data class Gif(
     val networkUrl: String,
     @ColumnInfo(defaultValue = "")
     val localUrl: String = "",
+    @ColumnInfo(defaultValue = "0")
+    val isDeleted: Boolean = false,
 )

@@ -15,13 +15,16 @@ import com.ahrokholska.gifs.data.local.entities.RemoteKey
 
 @Database(
     entities = [Gif::class, RemoteKey::class, GifTag::class],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(
             from = 3,
             to = 4,
             spec = AppDatabase.AutoMigration_3_4::class
+        ), AutoMigration(
+            from = 4,
+            to = 5,
         )
     ]
 )

@@ -1,5 +1,6 @@
 package com.ahrokholska.gifs.presentation.screens.home
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,10 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import coil3.compose.SubcomposeAsyncImage
 import com.ahrokholska.gifs.domain.model.Gif
 import kotlinx.coroutines.flow.flowOf
@@ -35,25 +38,18 @@ import kotlinx.coroutines.flow.flowOf
 fun GifFullScreen(initialPosition: Int, viewModel: HomeScreenViewModel = hiltViewModel()) {
     GifFullScreenContent(
         initialPosition = initialPosition,
-        gifs = viewModel.gifs.collectAsLazyPagingItems()
+        gifs = viewModel.gifs.collectAsLazyPagingItems(),
+        onDeleteImageClick = viewModel::deleteGif,
     )
 }
 
 @Composable
-fun GifFullScreenContent(initialPosition: Int, gifs: LazyPagingItems<Gif>) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        floatingActionButton = {
-            FloatingActionButton(
-                containerColor = MaterialTheme.colorScheme.error,
-                onClick = {}
-            ) {
-                Icon(
-                    painter = rememberVectorPainter(image = Icons.Filled.Delete),
-                    contentDescription = null
-                )
-            }
-        }) { innerPadding ->
+fun GifFullScreenContent(
+    initialPosition: Int,
+    gifs: LazyPagingItems<Gif>,
+    onDeleteImageClick: (id: String) -> Unit = {}
+) {
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         val pagerState = rememberPagerState(
             initialPage = initialPosition,
             pageCount = { gifs.itemCount }
@@ -64,29 +60,41 @@ fun GifFullScreenContent(initialPosition: Int, gifs: LazyPagingItems<Gif>) {
                 .statusBarsPadding()
                 .padding(innerPadding),
             state = pagerState,
+            key = gifs.itemKey { it.id }
         ) { page ->
             gifs[page]?.let { gif ->
                 val model by rememberSaveable(key = gif.id) { mutableStateOf(gif.url) }
-
-                SubcomposeAsyncImage(
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Fit,
-                    model = model,
-                    loading = {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .wrapContentSize(Alignment.Center)
-                        )
-                    },
-                    error = {
+                Box(contentAlignment = Alignment.BottomEnd) {
+                    SubcomposeAsyncImage(
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit,
+                        model = model,
+                        loading = {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .wrapContentSize(Alignment.Center)
+                            )
+                        },
+                        error = {
+                            Icon(
+                                painter = rememberVectorPainter(image = Icons.Filled.Clear),
+                                contentDescription = null
+                            )
+                        },
+                        contentDescription = null,
+                    )
+                    FloatingActionButton(
+                        modifier = Modifier.padding(10.dp),
+                        containerColor = MaterialTheme.colorScheme.error,
+                        onClick = { onDeleteImageClick(gif.id) }
+                    ) {
                         Icon(
-                            painter = rememberVectorPainter(image = Icons.Filled.Clear),
+                            painter = rememberVectorPainter(image = Icons.Filled.Delete),
                             contentDescription = null
                         )
-                    },
-                    contentDescription = null,
-                )
+                    }
+                }
             }
         }
     }
