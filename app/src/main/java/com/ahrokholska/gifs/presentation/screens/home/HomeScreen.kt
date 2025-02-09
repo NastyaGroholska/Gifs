@@ -51,15 +51,20 @@ import com.ahrokholska.gifs.domain.model.Gif
 import kotlinx.coroutines.flow.flowOf
 
 @Composable
-fun HomeScreen(viewModel: HomeScreenViewModel = hiltViewModel()) {
+fun HomeScreen(viewModel: HomeScreenViewModel = hiltViewModel(),onImageClick: (Int) -> Unit) {
     HomeScreenContent(
         gifs = viewModel.gifs.collectAsLazyPagingItems(),
         onSearchClick = viewModel::searchChanged,
+        onImageClick = onImageClick
     )
 }
 
 @Composable
-fun HomeScreenContent(gifs: LazyPagingItems<Gif>, onSearchClick: (String) -> Unit = {}) {
+fun HomeScreenContent(
+    gifs: LazyPagingItems<Gif>,
+    onSearchClick: (String) -> Unit = {},
+    onImageClick: (Int) -> Unit = {}
+) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
             modifier = Modifier
@@ -112,7 +117,7 @@ fun HomeScreenContent(gifs: LazyPagingItems<Gif>, onSearchClick: (String) -> Uni
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(5.dp))
                                     .clickable {
-                                        onIm(gif.id)
+                                        onImageClick(index)
                                     },
                                 contentScale = ContentScale.FillWidth,
                                 model = model,

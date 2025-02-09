@@ -5,4 +5,7 @@ import kotlinx.serialization.Serializable
 sealed class Screen {
     @Serializable
     data object Home : Screen()
+
+    @Serializable
+    data class GifFull(val gifIndex: Int) : Screen()
 }
