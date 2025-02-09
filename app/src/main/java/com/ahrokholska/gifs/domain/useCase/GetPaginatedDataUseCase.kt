@@ -17,12 +17,12 @@ class GetPaginatedDataUseCase @Inject constructor(
     private val database: AppDatabase,
     private val gifsDao: GifDao,
     private val gifService: GifService,
-    private val cacheGifUseCase: CacheGifUseCase,
+    private val cacheAllGifsUseCase: CacheAllGifsUseCase,
 ) {
     @OptIn(ExperimentalPagingApi::class)
     operator fun invoke(query: String) = Pager(
         config = PagingConfig(pageSize = PAGE_SIZE),
-        remoteMediator = GifRemoteMediator(query, database, gifService, cacheGifUseCase)
+        remoteMediator = GifRemoteMediator(query, database, gifService, cacheAllGifsUseCase)
     ) {
         gifsDao.pagingSource(query)
     }.flow.map { pagingData ->

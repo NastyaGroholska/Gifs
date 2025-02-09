@@ -11,7 +11,7 @@ import com.ahrokholska.gifs.data.local.entities.RemoteKey
 import com.ahrokholska.gifs.data.mappers.toEntity
 import com.ahrokholska.gifs.data.mappers.toGifTag
 import com.ahrokholska.gifs.data.network.GifService
-import com.ahrokholska.gifs.domain.useCase.CacheGifUseCase
+import com.ahrokholska.gifs.domain.useCase.CacheAllGifsUseCase
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
@@ -20,7 +20,7 @@ class GifRemoteMediator(
     private val query: String,
     private val database: AppDatabase,
     private val gifService: GifService,
-    private val cacheGifUseCase: CacheGifUseCase
+    private val cacheAllGifsUseCase: CacheAllGifsUseCase
 ) : RemoteMediator<Int, Gif>() {
     private val gifsDao = database.gifDao()
     private val remoteKeyDao = database.remoteKeyDao()
@@ -72,9 +72,7 @@ class GifRemoteMediator(
                 gifsDao.insertAllTags(response.data.map { it.toGifTag(query) })
             }
 
-            response.data.forEach {
-                cacheGifUseCase(it.id, it.images.original.url)
-            }
+            cacheAllGifsUseCase(response.data.map { it.id })
 
             MediatorResult.Success(isEndOfPaginationReached)
         } catch (e: Exception) {

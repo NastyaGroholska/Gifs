@@ -26,13 +26,11 @@ class CacheGifWorker @AssistedInject constructor(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             val id = inputData.getString(ID_PARAM) ?: return@withContext Result.failure()
-            val url = inputData.getString(URL_PARAM) ?: return@withContext Result.failure()
 
             val gif = gifDao.getGifById(id) ?: return@withContext Result.failure()
             if (gif.localUrl.isNotEmpty()) return@withContext Result.success()
 
-
-            val response = gifService.downloadFile(url).body()
+            val response = gifService.downloadFile(gif.networkUrl).body()
                 ?: return@withContext Result.failure()
 
             val file = File(
@@ -64,6 +62,5 @@ class CacheGifWorker @AssistedInject constructor(
     companion object {
         const val IMAGE_PATH = "images"
         const val ID_PARAM = "id"
-        const val URL_PARAM = "url"
     }
 }

@@ -1,6 +1,5 @@
 package com.ahrokholska.gifs.presentation.screens.home
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -144,12 +143,6 @@ fun HomeScreenContent(
                                 },
                                 contentScale = ContentScale.FillWidth,
                                 model = model,
-                                onSuccess = {
-                                    Log.d("WWW", "onSuccess ${gif.id} ${gif.url}")
-                                },
-                                onError = {
-                                    Log.d("WWW", "onError ${gif.id} ${gif.url}")
-                                },
                                 loading = {
                                     Box(
                                         modifier = Modifier
