@@ -1,5 +1,10 @@
 package com.ahrokholska.gifs.presentation.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,20 +39,31 @@ import coil3.compose.SubcomposeAsyncImage
 import com.ahrokholska.gifs.domain.model.Gif
 import kotlinx.coroutines.flow.flowOf
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun GifFullScreen(initialPosition: Int, viewModel: HomeScreenViewModel = hiltViewModel()) {
+fun GifFullScreen(
+    initialPosition: Int,
+    viewModel: HomeScreenViewModel = hiltViewModel(),
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+) {
     GifFullScreenContent(
         initialPosition = initialPosition,
         gifs = viewModel.gifs.collectAsLazyPagingItems(),
         onDeleteImageClick = viewModel::deleteGif,
+        sharedTransitionScope = sharedTransitionScope,
+        animatedVisibilityScope = animatedVisibilityScope,
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun GifFullScreenContent(
     initialPosition: Int,
     gifs: LazyPagingItems<Gif>,
-    onDeleteImageClick: (id: String) -> Unit = {}
+    onDeleteImageClick: (id: String) -> Unit = {},
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         val pagerState = rememberPagerState(
@@ -66,7 +82,14 @@ fun GifFullScreenContent(
                 val model by rememberSaveable(key = gif.id) { mutableStateOf(gif.url) }
                 Box(contentAlignment = Alignment.BottomEnd) {
                     SubcomposeAsyncImage(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = with(sharedTransitionScope) {
+                            Modifier
+                                .fillMaxSize()
+                                .sharedElement(
+                                    rememberSharedContentState(key = gif.id),
+                                    animatedVisibilityScope = animatedVisibilityScope
+                                )
+                        },
                         contentScale = ContentScale.Fit,
                         model = model,
                         loading = {
@@ -100,17 +123,25 @@ fun GifFullScreenContent(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview
 @Composable
 private fun GifFullScreenPreview() {
-    GifFullScreenContent(
-        initialPosition = 0,
-        gifs = flowOf(PagingData.from(
-            List(15) {
-                Gif(
-                    id = "",
-                    url = "https://media3.giphy.com/media/v1.Y2lkPWEwMDMxZWRkNXI1MXgzZ3g1dXZvZnplOXA1bHpza2Y1NG1yeGtnMHllZzBjNnFoZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/IgOEWPOgK6uVa/200w.gif"
-                )
-            }
-        )).collectAsLazyPagingItems())
+    SharedTransitionLayout {
+        AnimatedVisibility(visible = true) {
+            GifFullScreenContent(
+                initialPosition = 0,
+                gifs = flowOf(PagingData.from(
+                    List(15) {
+                        Gif(
+                            id = "",
+                            url = "https://media3.giphy.com/media/v1.Y2lkPWEwMDMxZWRkNXI1MXgzZ3g1dXZvZnplOXA1bHpza2Y1NG1yeGtnMHllZzBjNnFoZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/IgOEWPOgK6uVa/200w.gif"
+                        )
+                    }
+                )).collectAsLazyPagingItems(),
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedVisibilityScope = this,
+            )
+        }
+    }
 }

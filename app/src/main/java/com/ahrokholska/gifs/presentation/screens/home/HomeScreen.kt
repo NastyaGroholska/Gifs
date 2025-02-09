@@ -1,5 +1,11 @@
 package com.ahrokholska.gifs.presentation.screens.home
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,20 +56,31 @@ import com.ahrokholska.gifs.R
 import com.ahrokholska.gifs.domain.model.Gif
 import kotlinx.coroutines.flow.flowOf
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun HomeScreen(viewModel: HomeScreenViewModel = hiltViewModel(),onImageClick: (Int) -> Unit) {
+fun HomeScreen(
+    viewModel: HomeScreenViewModel = hiltViewModel(),
+    onImageClick: (Int) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+) {
     HomeScreenContent(
         gifs = viewModel.gifs.collectAsLazyPagingItems(),
         onSearchClick = viewModel::searchChanged,
-        onImageClick = onImageClick
+        onImageClick = onImageClick,
+        sharedTransitionScope = sharedTransitionScope,
+        animatedVisibilityScope = animatedVisibilityScope
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun HomeScreenContent(
     gifs: LazyPagingItems<Gif>,
     onSearchClick: (String) -> Unit = {},
-    onImageClick: (Int) -> Unit = {}
+    onImageClick: (Int) -> Unit = {},
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
@@ -114,13 +131,25 @@ fun HomeScreenContent(
                             val model by rememberSaveable(key = gif.id) { mutableStateOf(gif.url) }
 
                             SubcomposeAsyncImage(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(5.dp))
-                                    .clickable {
-                                        onImageClick(index)
-                                    },
+                                modifier = with(sharedTransitionScope) {
+                                    Modifier
+                                        .clip(RoundedCornerShape(5.dp))
+                                        .sharedElement(
+                                            rememberSharedContentState(key = gif.id),
+                                            animatedVisibilityScope = animatedVisibilityScope
+                                        )
+                                        .clickable {
+                                            onImageClick(index)
+                                        }
+                                },
                                 contentScale = ContentScale.FillWidth,
                                 model = model,
+                                onSuccess = {
+                                    Log.d("WWW", "onSuccess ${gif.id} ${gif.url}")
+                                },
+                                onError = {
+                                    Log.d("WWW", "onError ${gif.id} ${gif.url}")
+                                },
                                 loading = {
                                     Box(
                                         modifier = Modifier
@@ -198,20 +227,27 @@ private fun SearchField(
     )
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Preview
 @Composable
 private fun HomeScreenPreview() {
-    HomeScreenContent(
-        gifs =
-        flowOf(
-            PagingData.from(
-                List(15) {
-                    Gif(
-                        id = "$it",
-                        url = "https://media3.giphy.com/media/v1.Y2lkPWEwMDMxZWRkNXI1MXgzZ3g1dXZvZnplOXA1bHpza2Y1NG1yeGtnMHllZzBjNnFoZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/IgOEWPOgK6uVa/200w.gif"
-                    )
-                }
-            )).collectAsLazyPagingItems()
-    )
+    SharedTransitionLayout {
+        AnimatedVisibility(visible = true) {
+            HomeScreenContent(
+                gifs =
+                flowOf(
+                    PagingData.from(
+                        List(15) {
+                            Gif(
+                                id = "$it",
+                                url = "https://media3.giphy.com/media/v1.Y2lkPWEwMDMxZWRkNXI1MXgzZ3g1dXZvZnplOXA1bHpza2Y1NG1yeGtnMHllZzBjNnFoZyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/IgOEWPOgK6uVa/200w.gif"
+                            )
+                        }
+                    )).collectAsLazyPagingItems(),
+                sharedTransitionScope = this@SharedTransitionLayout,
+                animatedVisibilityScope = this
+            )
+        }
+    }
 }
 

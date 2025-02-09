@@ -1,5 +1,7 @@
 package com.ahrokholska.gifs.presentation.navigation
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -14,24 +16,32 @@ import androidx.navigation.toRoute
 import com.ahrokholska.gifs.presentation.screens.home.GifFullScreen
 import com.ahrokholska.gifs.presentation.screens.home.HomeScreen
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun Navigation() {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.HomeGraph) {
-        navigation<Screen.HomeGraph>(Screen.HomeGraph.Home) {
-            composable<Screen.HomeGraph.Home> { backStackEntry ->
-                HomeScreen(
-                    viewModel = backStackEntry.sharedViewModel(navController),
-                    onImageClick = {
-                        navController.navigate(Screen.HomeGraph.GifFull(it))
-                    })
-            }
+    SharedTransitionLayout {
+        val navController = rememberNavController()
+        NavHost(navController = navController, startDestination = Screen.HomeGraph) {
+            navigation<Screen.HomeGraph>(Screen.HomeGraph.Home) {
+                composable<Screen.HomeGraph.Home> { backStackEntry ->
+                    HomeScreen(
+                        viewModel = backStackEntry.sharedViewModel(navController),
+                        onImageClick = {
+                            navController.navigate(Screen.HomeGraph.GifFull(it))
+                        },
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this,
+                    )
+                }
 
-            composable<Screen.HomeGraph.GifFull> { backStackEntry ->
-                GifFullScreen(
-                    initialPosition = backStackEntry.toRoute<Screen.HomeGraph.GifFull>().gifIndex,
-                    viewModel = backStackEntry.sharedViewModel(navController),
-                )
+                composable<Screen.HomeGraph.GifFull> { backStackEntry ->
+                    GifFullScreen(
+                        initialPosition = backStackEntry.toRoute<Screen.HomeGraph.GifFull>().gifIndex,
+                        viewModel = backStackEntry.sharedViewModel(navController),
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this,
+                    )
+                }
             }
         }
     }

@@ -35,11 +35,8 @@ class GifRemoteMediator(
                         remoteKeyDao.remoteKeyByQuery(query)
                     }
 
-                    if (remoteKey.nextKey == null) {
-                        return MediatorResult.Success(endOfPaginationReached = true)
-                    }
-
                     remoteKey.nextKey
+                        ?: return MediatorResult.Success(endOfPaginationReached = true)
                 }
             }
 
