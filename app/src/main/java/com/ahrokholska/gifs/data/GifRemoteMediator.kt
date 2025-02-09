@@ -1,6 +1,5 @@
 package com.ahrokholska.gifs.data
 
-import android.util.Log
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -29,16 +28,12 @@ class GifRemoteMediator(
     override suspend fun load(loadType: LoadType, state: PagingState<Int, Gif>): MediatorResult {
         return try {
             val loadKey = when (loadType) {
-                LoadType.REFRESH -> 0.also { Log.d("WWW", "REFRESH") }
+                LoadType.REFRESH -> 0
                 LoadType.PREPEND -> return MediatorResult.Success(endOfPaginationReached = true)
-                    .also { Log.d("WWW", "PREPEND") }
-
                 LoadType.APPEND -> {
-                    Log.d("WWW", "APPEND")
                     val remoteKey = database.withTransaction {
                         remoteKeyDao.remoteKeyByQuery(query)
                     }
-                    Log.d("WWW", "remoteKey $remoteKey")
 
                     if (remoteKey.nextKey == null) {
                         return MediatorResult.Success(endOfPaginationReached = true)
@@ -49,7 +44,6 @@ class GifRemoteMediator(
             }
 
             val limit = state.config.pageSize
-            Log.d("WWW", "network limit=$limit offset=$loadKey")
 
             val response = if (query.isEmpty()) {
                 gifService.getTrendingGifs(
@@ -64,22 +58,16 @@ class GifRemoteMediator(
                 )
             }
 
-            Log.d("WWW", "result $response")
-
             val totalCount = response.pagination.totalCount
             val count = response.pagination.count
             val offset = response.pagination.offset
             val isEndOfPaginationReached = totalCount == count + offset
 
-            Log.d("WWW", "loadKey + count ${loadKey + count}")
-
             database.withTransaction {
                 remoteKeyDao.insertOrReplace(
                     RemoteKey(
                         label = query,
-                        nextKey = if (isEndOfPaginationReached
-                            || loadKey + count == 3
-                        ) null else loadKey + count
+                        nextKey = if (isEndOfPaginationReached) null else loadKey + count
                     )
                 )
 
